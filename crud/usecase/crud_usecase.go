@@ -31,10 +31,12 @@ func (cuc *CrudUseCase) GetDataUC(ctx context.Context) (resp model.GetDataRespon
 }
 
 func (cuc *CrudUseCase) InsertDataUC(ctx context.Context, req model.DataProduct) (resp bool, err error) {
+	//check if context is nil
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
+	//insert data
 	err = cuc.crudRepo.InsertData(ctx, req)
 	if err != nil {
 		return false, err
