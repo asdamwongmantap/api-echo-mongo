@@ -42,3 +42,19 @@ func (cr CrudRepository) GetAllData(ctx context.Context) (crudResp model.GetData
 
 	return crudResp, err
 }
+
+func (cr CrudRepository) InsertData(ctx context.Context, req model.DataProduct) (err error) {
+
+	datareq := bson.M{
+		"name": req.Name,
+	}
+
+	log.Println("tesnama", req.Name)
+
+	_, err = cr.mongoDB.Collection("product").InsertOne(ctx, datareq)
+	if err != nil {
+		log.Println("error")
+	}
+
+	return err
+}
