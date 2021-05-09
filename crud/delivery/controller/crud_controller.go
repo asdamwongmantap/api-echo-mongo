@@ -59,3 +59,18 @@ func (cc *CrudController) UpdateData(ec echo.Context) error {
 
 	return ec.JSON(200, data)
 }
+
+func (cc *CrudController) DeleteData(ec echo.Context) error {
+
+	var req model.DataProductRequest
+	err := json.NewDecoder(ec.Request().Body).Decode(&req)
+	if err != nil {
+		return err
+	}
+	data, err := cc.usecase.DeleteDataUC(context.Background(), req)
+	if err != nil {
+		return err
+	}
+
+	return ec.JSON(200, data)
+}

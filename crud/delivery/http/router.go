@@ -14,5 +14,6 @@ func NewRouter(e *echo.Echo, crudUseCase crud.CrudUseCaseI) {
 	r.GET("/list", crudCtrl.GetData)
 	r.POST("/add", crudCtrl.InsertData)
 	r.POST("/edit", crudCtrl.UpdateData)
+	r.POST("/delete", crudCtrl.DeleteData)
 
 }

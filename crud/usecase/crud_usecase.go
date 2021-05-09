@@ -59,3 +59,18 @@ func (cuc *CrudUseCase) UpdateDataUC(ctx context.Context, req model.DataProductR
 
 	return true, nil
 }
+
+func (cuc *CrudUseCase) DeleteDataUC(ctx context.Context, req model.DataProductRequest) (resp bool, err error) {
+	//check if context is nil
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	//update data
+	err = cuc.crudRepo.DeleteData(ctx, req)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}

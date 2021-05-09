@@ -86,3 +86,15 @@ func (cr CrudRepository) UpdateData(ctx context.Context, req model.DataProductRe
 
 	return err
 }
+
+func (cr CrudRepository) DeleteData(ctx context.Context, req model.DataProductRequest) (err error) {
+
+	dataUpdateProductID := bson.M{"product_id": req.ProductID}
+
+	_, err = cr.mongoDB.Collection("product").DeleteOne(ctx, dataUpdateProductID)
+	if err != nil {
+		log.Println("error")
+	}
+
+	return err
+}
