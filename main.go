@@ -6,6 +6,7 @@ import (
 	"github.com/asdamwongmantap/api-echo-mongo/crud/model"
 	"github.com/asdamwongmantap/api-echo-mongo/crud/repository"
 	"github.com/asdamwongmantap/api-echo-mongo/crud/usecase"
+	"github.com/asdamwongmantap/api-echo-mongo/lib/config"
 	"github.com/asdamwongmantap/api-echo-mongo/lib/db"
 	"github.com/labstack/echo/v4/middleware"
 	"log"
@@ -13,6 +14,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 )
+
+//to initialize viper config
+func init() {
+	config.SetConfigFile("config", "lib/config", "json")
+}
 
 func main() {
 	envConfig := getConfig()
@@ -37,21 +43,21 @@ func main() {
 	// Router
 	httpDelivery.NewRouter(e, crudUseCase)
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf("%s%s%v",envConfig.Host,":",envConfig.Port)))
+	e.Logger.Fatal(e.Start(fmt.Sprintf("%s%s%v", envConfig.Host, ":", envConfig.Port)))
 }
 
 func getConfig() model.EnvConfig {
 
 	return model.EnvConfig{
-			Host: "0.0.0.0",
-			Port: 9595,
-			Mongo: db.MongoConfig{
-			Timeout:  5000,
-			DBname:   "crud_learn",
-			Username: "",
-			Password: "",
-			Host:     "0.0.0.0",
-			Port:     "27017",
+		Host: config.GetString("host.address"),
+		Port: config.GetInt("host.port"),
+		Mongo: db.MongoConfig{
+			Timeout:  config.GetInt("database.mongodb.timeout"),
+			DBname:   config.GetString("database.mongodb.dbname"),
+			Username: config.GetString("database.mongodb.user"),
+			Password: config.GetString("database.mongodb.password"),
+			Host:     config.GetString("database.mongodb.host"),
+			Port:     config.GetString("database.mongodb.port"),
 		},
 	}
 }
