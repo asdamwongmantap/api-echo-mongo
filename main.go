@@ -8,6 +8,7 @@ import (
 	"github.com/asdamwongmantap/api-echo-mongo/crud/usecase"
 	"github.com/asdamwongmantap/api-echo-mongo/lib/config"
 	"github.com/asdamwongmantap/api-echo-mongo/lib/db"
+	"github.com/asdamwongmantap/api-echo-mongo/lib/logging"
 	"github.com/labstack/echo/v4/middleware"
 	"log"
 	"net/http"
@@ -30,6 +31,8 @@ func main() {
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{http.MethodGet, http.MethodHead, http.MethodPut, http.MethodPatch, http.MethodPost, http.MethodDelete},
 	}))
+
+	e.Use(logging.MiddlewareLogging)
 
 	// Mongo
 	mongo, err := db.Connect(envConfig.Mongo)
