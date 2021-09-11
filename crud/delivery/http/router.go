@@ -13,5 +13,7 @@ func NewRouter(e *echo.Echo, crudUseCase crud.CrudUseCaseI) {
 	r := e.Group("/api/v1/go-mongo")
 	r.GET("/list", crudCtrl.GetData)
 	r.POST("/add", crudCtrl.InsertData)
+	r.POST("/edit", crudCtrl.UpdateData)
+	r.POST("/delete", crudCtrl.DeleteData)
 
 }

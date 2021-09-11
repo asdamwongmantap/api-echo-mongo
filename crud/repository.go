@@ -7,5 +7,7 @@ import (
 
 type CrudRepositoryI interface {
 	GetAllData(ctx context.Context) (crudResp model.GetDataResponse, err error)
-	InsertData(ctx context.Context, req model.DataProduct) error
+	InsertData(ctx context.Context, req model.DataProductRequest) error
+	UpdateData(ctx context.Context, req model.DataProductRequest) error
+	DeleteData(ctx context.Context, req model.DataProductRequest) error
 }

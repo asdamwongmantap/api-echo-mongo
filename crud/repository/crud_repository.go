@@ -2,9 +2,12 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"github.com/asdamwongmantap/api-echo-mongo/crud"
 	"github.com/asdamwongmantap/api-echo-mongo/crud/model"
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 )
@@ -43,15 +46,52 @@ func (cr CrudRepository) GetAllData(ctx context.Context) (crudResp model.GetData
 	return crudResp, err
 }
 
-func (cr CrudRepository) InsertData(ctx context.Context, req model.DataProduct) (err error) {
+func (cr CrudRepository) InsertData(ctx context.Context, req model.DataProductRequest) (err error) {
 
-	datareq := bson.M{
-		"name": req.Name,
+	dataReq := bson.M{
+		"product_name": req.ProductName,
 	}
 
-	log.Println("tesnama", req.Name)
+	query, err := cr.mongoDB.Collection("product").InsertOne(ctx, dataReq)
+	if err != nil {
+		log.Println("error")
+	}
 
-	_, err = cr.mongoDB.Collection("product").InsertOne(ctx, datareq)
+	if oid, ok := query.InsertedID.(primitive.ObjectID); ok {
+		productID := oid.Hex()
+		dataUpdateProductID := bson.M{"_id": oid}
+		dataObjectID := bson.M{"$set": bson.M{"product_id": productID}}
+		_, err := cr.mongoDB.Collection("product").UpdateOne(ctx, dataUpdateProductID, dataObjectID)
+		if err != nil {
+			log.Println("error")
+		}
+	} else {
+		err = errors.New(fmt.Sprint("can't get inserted ID ", err))
+		log.Println("error")
+	}
+
+	return err
+}
+
+func (cr CrudRepository) UpdateData(ctx context.Context, req model.DataProductRequest) (err error) {
+
+	dataUpdateProductID := bson.M{"product_id": req.ProductID}
+	dataObjectID := bson.M{"$set": bson.M{
+		"product_name": req.ProductName,
+	}}
+	_, err = cr.mongoDB.Collection("product").UpdateOne(ctx, dataUpdateProductID, dataObjectID)
+	if err != nil {
+		log.Println("error")
+	}
+
+	return err
+}
+
+func (cr CrudRepository) DeleteData(ctx context.Context, req model.DataProductRequest) (err error) {
+
+	dataUpdateProductID := bson.M{"product_id": req.ProductID}
+
+	_, err = cr.mongoDB.Collection("product").DeleteOne(ctx, dataUpdateProductID)
 	if err != nil {
 		log.Println("error")
 	}
