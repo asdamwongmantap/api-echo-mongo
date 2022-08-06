@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	httpDelivery "github.com/asdamwongmantap/api-echo-mongo/crud/delivery/http"
 	"github.com/asdamwongmantap/api-echo-mongo/crud/model"
 	"github.com/asdamwongmantap/api-echo-mongo/crud/repository"
@@ -9,9 +12,8 @@ import (
 	"github.com/asdamwongmantap/api-echo-mongo/lib/config"
 	"github.com/asdamwongmantap/api-echo-mongo/lib/db"
 	"github.com/asdamwongmantap/api-echo-mongo/lib/logging"
+	"github.com/asdamwongmantap/api-echo-mongo/lib/queue"
 	"github.com/labstack/echo/v4/middleware"
-	"log"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
@@ -41,8 +43,15 @@ func main() {
 		return
 	}
 
+	// Queue
+	rabbitMq, err := queue.Connect(envConfig.RabbitMQ)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
 	crudRepo := repository.NewCrudRepository(mongo)
-	crudUseCase := usecase.NewCrudUseCase(&envConfig, crudRepo)
+	crudUseCase := usecase.NewCrudUseCase(&envConfig, crudRepo, rabbitMq)
 	// Router
 	httpDelivery.NewRouter(e, crudUseCase)
 
@@ -61,6 +70,13 @@ func getConfig() model.EnvConfig {
 			Password: config.GetString("database.mongodb.password"),
 			Host:     config.GetString("database.mongodb.host"),
 			Port:     config.GetString("database.mongodb.port"),
+		},
+		RabbitMQ: queue.QueueConfig{
+			Timeout:  config.GetInt("queue.rabbit.timeout"),
+			Username: config.GetString("queue.rabbit.user"),
+			Password: config.GetString("queue.rabbit.password"),
+			Host:     config.GetString("queue.rabbit.host"),
+			Port:     config.GetString("queue.rabbit.port"),
 		},
 	}
 }

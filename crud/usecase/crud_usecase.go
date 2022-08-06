@@ -2,23 +2,28 @@ package usecase
 
 import (
 	"context"
+	"fmt"
+	"log"
+
 	"github.com/asdamwongmantap/api-echo-mongo/crud"
 	"github.com/asdamwongmantap/api-echo-mongo/crud/model"
 	"github.com/asdamwongmantap/api-echo-mongo/lib/logging"
 	"github.com/pkg/errors"
+	"github.com/streadway/amqp"
 	"go.uber.org/zap"
-	"log"
 )
 
 type CrudUseCase struct {
 	config   *model.EnvConfig
 	crudRepo crud.CrudRepositoryI
+	rabbitMq *amqp.Connection
 }
 
-func NewCrudUseCase(config *model.EnvConfig, crudRepo crud.CrudRepositoryI) crud.CrudUseCaseI {
+func NewCrudUseCase(config *model.EnvConfig, crudRepo crud.CrudRepositoryI, rabbitMq *amqp.Connection) crud.CrudUseCaseI {
 	return &CrudUseCase{
 		config:   config,
 		crudRepo: crudRepo,
+		rabbitMq: rabbitMq,
 	}
 }
 
@@ -52,6 +57,50 @@ func (cuc *CrudUseCase) InsertDataUC(ctx context.Context, req model.DataProductR
 	if err != nil {
 		return false, err
 	}
+
+	//publish rabbit mq
+	ch, err := cuc.rabbitMq.Channel()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer ch.Close()
+
+	// with this channel open, we can then start to interact
+	// with the instance and declare Queues that we can publish and
+	// subscribe to
+	q, err := ch.QueueDeclare(
+		"MsgRabbitGo",
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
+	// We can print out the status of our Queue here
+	// this will information like the amount of messages on
+	// the queue
+	fmt.Println("queue -> ", q)
+	// Handle any errors if we were unable to create the queue
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// attempt to publish a message to the queue!
+	err = ch.Publish(
+		"",
+		"MsgRabbitGo",
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        []byte("Hello World"),
+		},
+	)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("Successfully Published Message to Queue")
 
 	return true, nil
 }
