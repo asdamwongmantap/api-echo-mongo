@@ -79,7 +79,7 @@ func (cuc *CrudUseCase) InsertDataUC(ctx context.Context, req model.DataProductR
 	// We can print out the status of our Queue here
 	// this will information like the amount of messages on
 	// the queue
-	fmt.Println(q)
+	fmt.Println("queue -> ", q)
 	// Handle any errors if we were unable to create the queue
 	if err != nil {
 		fmt.Println(err)
